@@ -1,0 +1,17 @@
+request_id,request_date,response
+1,2025-04-01,"
+Thank you for your order! Here is the summary of your request:
+
+- **Order Details**:
+  - 100 sheets of Cardstock
+  - **Unit Price**: $0.15
+  - **Total Price**: $15.00
+  - **Quote Explanation**: ""Thank you for your order of 100 sheets of Cardstock! The total price for your order is $15.00. We have applied a bulk discount to ensure you receive the best value for your purchase. For your reference, similar past orders have also benefited from bulk pricing, ensuring our customers get quality materials at a friendly price.""
+
+- **Availability**:
+  - 200 sheets of Glossy paper: Unavailable
+  - 100 sheets of Colored paper: Unavailable
+  - 100 sheets of Cardstock: Available
+
+- **Shipping Statement**: Shipping feasibility confirmed for 100 sheets of Cardstock.
+"
