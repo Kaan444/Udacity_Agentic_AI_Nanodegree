@@ -1,0 +1,45 @@
+Project Reflection: Munder Difflin Multi-Agent System
+
+This project implements a modular, text-based multi-agent system to support inventory management, quote generation, and order fulfillment for the fictional Munder Difflin Paper Company. The system was designed to emphasize clear agent separation, safe data handling, and extensible orchestration using a central coordinating agent.
+
+Why an Orchestrator Agent Was Used
+
+An Orchestrator agent was introduced to manage the overall workflow and delegate tasks to specialized agents. Rather than embedding business logic directly in procedural Python code, the Orchestrator serves as the single decision-making layer that interprets customer requests and coordinates the correct sequence of actions. This design mirrors real-world organizational structures, where a manager delegates work to domain experts.
+
+Using an Orchestrator ensures that:
+
+The system qualifies as a true multi-agent architecture rather than a scripted pipeline.
+
+Responsibilities remain clearly separated across agents.
+
+Future extensions (e.g., adding a compliance agent or pricing agent) can be integrated without rewriting the workflow.
+
+Why Tools Wrap Agents
+
+Agent-to-agent communication is implemented via tools (e.g., ask_inventory_agent, ask_quote_agent, ask_fulfillment_agent) rather than direct method calls. This design choice enforces a clean abstraction boundary: the Orchestrator does not need to know how an agent operates internally—only what input it accepts and what output it returns.
+
+Wrapping agents as tools provides several advantages:
+
+It enforces text-only communication, aligning with the project constraints.
+
+It enables controlled delegation and predictable behavior.
+
+It allows agents to be swapped or updated independently without breaking orchestration logic.
+
+This approach also makes the architecture easier to reason about and debug, as all delegation paths are explicit and standardized.
+
+How Customer and Internal Data Privacy Is Enforced
+
+Privacy and data safety were key design considerations. The system explicitly avoids exposing internal or sensitive information in customer-facing responses. This includes:
+
+Inventory quantities
+
+Cash balances
+
+Restocking costs
+
+Internal transaction IDs
+
+Raw agent logs
+
+To enforce this, privacy-safe tools (e.g., safe_inventory_status_tool) return only high-level availability signals rather than raw data. Additionally, the Orchestrator filters outputs so that only customer-appropriate summaries (pricing, delivery estimates, and explanations) are returned. Internal financial reporting is kept entirely separate and used only for evaluation and logging purposes.

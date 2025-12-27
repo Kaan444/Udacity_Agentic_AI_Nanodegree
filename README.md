@@ -90,32 +90,3 @@ Make sure to submit the following files:
 2. A **workflow diagram** describing your agent architecture and data flow
 3. A `README.txt` or `design_notes.txt` explaining how your system works
 4. Outputs from your test run (like `test_results.csv`)
-
----
-
-Workflow Diagram (Mermaid):
-
-flowchart TD
-    U[Customer Request + Date] --> O[Orchestrator Agent]
-
-    O --> P[Deterministic Parser<br/>extract item, qty, date]
-    P --> I[Inventory Agent]
-    P --> Q[Quote Agent]
-    P --> F[Fulfillment Agent]
-
-    I -->|Tools| DB[(SQLite DB)]
-    Q -->|Tools| DB
-    F -->|Tools| DB
-
-    DB --> I
-    DB --> Q
-    DB --> F
-
-    I -->|Inventory status summary| O
-    Q -->|Quote explanation + history| O
-    F -->|Fulfillment narrative + ETA| O
-
-    O -->|Deterministic actions:<br/>restock decision, pricing, sales txn| DB
-    O --> R[Final Customer Response]
-    R --> LOG[test_results.csv log]
-

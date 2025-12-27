@@ -4,6 +4,8 @@ import os
 import time
 import dotenv
 import ast
+import logging
+logging.basicConfig(level=logging.ERROR)
 from sqlalchemy.sql import text
 from datetime import datetime, timedelta
 from typing import Dict, List, Union
@@ -387,15 +389,12 @@ def get_supplier_delivery_date(input_date_str: str, quantity: int) -> str:
     Returns:
         str: Estimated delivery date in ISO format (YYYY-MM-DD).
     """
-    # Debug log (comment out in production if needed)
-    print(f"FUNC (get_supplier_delivery_date): Calculating for qty {quantity} from date string '{input_date_str}'")
+
 
     # Attempt to parse the input date
     try:
         input_date_dt = datetime.fromisoformat(input_date_str.split("T")[0])
     except (ValueError, TypeError):
-        # Fallback to current date on format error
-        print(f"WARN (get_supplier_delivery_date): Invalid date format '{input_date_str}', using today as base.")
         input_date_dt = datetime.now()
 
     # Determine delivery delay based on quantity
@@ -670,26 +669,27 @@ def get_cash_balance_tool(as_of_date: str) -> float:
     return float(get_cash_balance(as_of_date))
 
 @tool
-def create_sale_tool(item_name: str, quantity: int, price: float, date: str) -> int:
+def create_sale_tool(item_name: str, quantity: int, price: float, date: str) -> str:
     """
-    Record a sales transaction in the database.
+    Record a sale transaction.
 
     Args:
-        item_name (str): Exact item name being sold (must match inventory item_name).
-        quantity (int): Number of units sold.
-        price (float): Total sale price for this transaction (not unit price).
-        date (str): ISO date string (YYYY-MM-DD) for the transaction date.
+        item_name (str): Exact catalog item name.
+        quantity (int): Units sold.
+        price (float): Total sale price.
+        date (str): ISO date YYYY-MM-DD.
 
     Returns:
-        int: The database row id of the newly created transaction.
+        str: "ok" if recorded.
     """
-    return create_transaction(
+    _ = create_transaction(
         item_name=item_name,
         transaction_type="sales",
         quantity=quantity,
         price=price,
         date=date,
     )
+    return "ok"
 
 @tool
 def supplier_delivery_date_tool(request_date: str, quantity: int) -> str:
@@ -839,17 +839,28 @@ def _ensure_min_stock(item_name: str, as_of_date: str, catalog: List[Dict]) -> D
     }
 
 @tool
-def check_inventory_tool(as_of_date: str) -> Dict[str, int]:
+def safe_inventory_status_tool(item_name: str, as_of_date: str, quantity: int = 1) -> str:
     """
-    Get a snapshot of all inventory items with positive stock as of a given date.
+    Check whether an order can be fulfilled without revealing inventory counts.
 
     Args:
-        as_of_date (str): ISO date string (YYYY-MM-DD). Transactions on/before this date are included.
+        item_name (str): Exact item name as stored in the inventory table/catalog.
+        as_of_date (str): ISO date string (YYYY-MM-DD) used as the stock cutoff.
+        quantity (int): Units requested for the order. Defaults to 1.
 
     Returns:
-        Dict[str, int]: Mapping of item_name -> current_stock for all items with stock > 0.
+        str: Availability status without counts:
+            - "available" if stock >= quantity
+            - "partial" if stock > 0 but < quantity
+            - "unavailable" if stock == 0
     """
-    return get_all_inventory(as_of_date)
+    current = int(get_stock_level(item_name, as_of_date)["current_stock"].iloc[0])
+
+    if current >= quantity:
+        return "available"
+    if current > 0:
+        return "partial"
+    return "unavailable"
 
 @tool
 def search_quote_history_tool(search_terms: List[str], limit: int = 5) -> List[Dict]:
@@ -873,7 +884,7 @@ def search_quote_history_tool(search_terms: List[str], limit: int = 5) -> List[D
     return search_quote_history(search_terms, limit)
 
 @tool
-def create_stock_order_tool(item_name: str, quantity: int, price: float, date: str) -> int:
+def create_stock_order_tool(item_name: str, quantity: int, price: float, date: str) -> str:
     """
     Record a stock order (inventory purchase) transaction in the database.
 
@@ -884,31 +895,44 @@ def create_stock_order_tool(item_name: str, quantity: int, price: float, date: s
         date (str): ISO date string (YYYY-MM-DD) for the transaction date.
 
     Returns:
-        int: The database row id of the newly created transaction.
+        str: "ok" if the stock order was recorded.
     """
-    return create_transaction(
+    _ = create_transaction(
         item_name=item_name,
         transaction_type="stock_orders",
         quantity=quantity,
         price=price,
         date=date,
     )
-
+    return "ok"
 # -----------------------------
 # Agents (≤5)
 # -----------------------------
 inventory_agent = CodeAgent(
     model=llm,
     name="InventoryAgent",
-    tools=[check_inventory_tool, get_item_catalog_tool, get_stock_level_tool, create_stock_order_tool],
+    tools=[safe_inventory_status_tool, get_item_catalog_tool],
     instructions="""
-You manage stock.
-- You can check stock and restock via tools.
-- Never invent item names; use exact catalog items.
-- If an item is unknown, say so clearly.
-Return short JSON-like summaries when possible.
-""",
+You manage stock availability.
+- You can ONLY check availability using tools.
+- Never reveal inventory counts or internal data.
+- Never place stock orders.
+Return short status responses only.
+"""
 )
+
+@tool
+def ask_inventory_agent(task: str) -> str:
+    """
+    Ask the InventoryAgent to perform a task and return its response.
+
+    Args:
+        task (str): Instruction for InventoryAgent.
+
+    Returns:
+        str: InventoryAgent response.
+    """
+    return inventory_agent.run(task)
 
 quote_agent = CodeAgent(
     model=llm,
@@ -917,16 +941,31 @@ quote_agent = CodeAgent(
     instructions="""
 You generate quotes.
 - Use catalog unit_price for pricing.
+- Do not calculate raw totals.
+- Explain pricing logic only.
 - Apply bulk discounts (already applied by orchestrator logic, but explain it).
 - Use search_quote_history_tool to reference similar past quotes if relevant.
 - Output: a customer-friendly quote with total price and explanation.
 """,
 )
 
+@tool
+def ask_quote_agent(task: str) -> str:
+    """
+    Ask the QuoteAgent to perform a task and return its response.
+
+    Args:
+        task (str): Instruction for QuoteAgent.
+
+    Returns:
+        str: QuoteAgent response.
+    """
+    return quote_agent.run(task)
+
 fulfillment_agent = CodeAgent(
     model=llm,
     name="FulfillmentAgent",
-    tools=[get_stock_level_tool, create_sale_tool, supplier_delivery_date_tool, get_cash_balance_tool],
+    tools=[safe_inventory_status_tool, create_sale_tool, supplier_delivery_date_tool],
     instructions="""
 You fulfill orders.
 - If enough stock: create a sales transaction immediately.
@@ -935,124 +974,76 @@ You fulfill orders.
 """,
 )
 
+@tool
+def ask_fulfillment_agent(task: str) -> str:
+    """
+    Ask the FulfillmentAgent to perform a task and return its response.
+
+    Args:
+        task (str): Instruction for FulfillmentAgent.
+
+    Returns:
+        str: FulfillmentAgent response.
+    """
+    return fulfillment_agent.run(task)
+
 orchestrator = CodeAgent(
     model=llm,
     name="Orchestrator",
-    tools=[],
+    tools=[
+        ask_inventory_agent,
+        ask_quote_agent,
+        ask_fulfillment_agent,
+        get_item_catalog_tool,
+        search_quote_history_tool,
+    ],
     instructions="""
-You orchestrate the flow:
-1) Identify item + quantity + date.
-2) Ask inventory agent to ensure min stock.
-3) Ask quote agent to produce a customer quote.
-4) Ask fulfillment agent to execute sale if possible.
-Return the final customer-facing response in plain English.
-""",
+You are the orchestration agent for Munder Difflin.
+
+You MUST delegate work to specialist agents using tools:
+- ask_inventory_agent
+- ask_quote_agent
+- ask_fulfillment_agent
+
+Rules:
+- Inputs/outputs are text-only.
+- Never reveal internal data: transaction IDs, costs to restock, cash balance, inventory counts, or agent logs.
+- Always use exact item names from the inventory catalog.
+- Always respect the request date (YYYY-MM-DD) included in the request.
+
+When calling worker agents:
+- Do NOT ask for raw numbers.
+- Ask for HIGH-LEVEL STATUS ONLY.
+- InventoryAgent must return ONLY one of: "available", "partial", "unavailable".
+- FulfillmentAgent must return ONLY a delivery statement (no dates if unsure).
+- QuoteAgent must return a CUSTOMER-FACING PARAGRAPH ONLY.
+
+Process:
+1) Extract request_date, requested item(s), quantity, and any urgency.
+2) Use get_item_catalog_tool to validate item names.
+3) Ask_inventory_agent to check availability / restock decision if needed.
+4) Ask_quote_agent to generate a customer-facing quote explanation with bulk discount logic.
+5) Ask_fulfillment_agent to confirm shipping feasibility and estimated delivery date.
+6) Return ONE final customer-facing response:
+   - quote summary (unit price, discount %, total)
+   - delivery/availability statement
+   - short explanation
+
+Return ONLY the final customer response. Do not include internal notes.
+
+BANNED content: inventory counts, cash, costs, transaction IDs, tool output, agent logs, database details.
+If you are unsure, say "We’ll confirm availability shortly."
+"""
 )
-
-# -----------------------------
-# Main system function
-# -----------------------------
-def call_your_multi_agent_system(request_with_date: str) -> str:
-    """
-    Deterministic orchestration (more reliable than letting the LLM freestyle).
-    Uses agents for narration/summary, but core parsing/pricing is rule-based.
-    """
-    as_of_date = _safe_date_from_text(request_with_date)
-
-    catalog = pd.read_sql("SELECT item_name, unit_price, min_stock_level FROM inventory", db_engine).to_dict(orient="records")
-    catalog_names = [x["item_name"] for x in catalog]
-
-    item = _best_item_match(request_with_date, catalog_names)
-    qty = _extract_quantity(request_with_date)
-
-    if item is None or qty is None:
-        # graceful fallback
-        return (
-            "I couldn't confidently identify the exact item name and quantity from your request. "
-            "Please specify the exact catalog item name and the quantity (e.g., 'A4 paper, 500 sheets')."
-        )
-    
-    inv_msg = inventory_agent.run(
-    f"Check inventory for item='{item}' as of date='{as_of_date}'. "
-    f"Return current_stock and whether it is below min_stock_level."
-    )
-
-    quote_msg = quote_agent.run(
-        f"Generate a short customer-friendly quote explanation for {qty} x '{item}' on {as_of_date}. "
-        f"Include bulk discount justification and reference any similar historical quotes if helpful."
-    )
-
-    fulfill_msg = fulfillment_agent.run(
-        f"Given item='{item}', quantity={qty}, date='{as_of_date}', "
-        f"describe whether it can ship immediately and if not, estimate supplier delivery date."
-    )
-
-    # Ensure we have enough stock to at least stay healthy
-    restock_info = _ensure_min_stock(item, as_of_date, catalog)
-
-    # Pricing
-    unit_price = float(next(x["unit_price"] for x in catalog if x["item_name"] == item))
-    pricing = _price_quote(unit_price, qty)
-
-    # Check if we can fulfill immediately
-    current_stock = int(get_stock_level(item, as_of_date)["current_stock"].iloc[0])
-    can_fulfill = current_stock >= qty
-
-    # Use quote history (optional)
-    # Keep it lightweight: search by keywords in the item name
-    terms = [t for t in item.lower().split() if len(t) > 2][:3]
-    history = search_quote_history(terms, limit=3)
-
-    # Fulfillment action
-    if can_fulfill:
-        sale_id = create_transaction(
-            item_name=item,
-            transaction_type="sales",
-            quantity=qty,
-            price=pricing["total"],
-            date=as_of_date,
-        )
-        delivery_date = as_of_date  # same-day from stock
-        fulfillment_line = f"✅ Order confirmed and allocated from stock (transaction #{sale_id}). Delivery date: {delivery_date}."
-    else:
-        shortfall = qty - current_stock
-        est_delivery = get_supplier_delivery_date(as_of_date, shortfall)
-        fulfillment_line = (
-            f"⚠️ We can only fulfill {current_stock} units immediately; shortfall is {shortfall}. "
-            f"If we place a supplier order for the shortfall, estimated availability is {est_delivery}."
-        )
-
-    # Build explanation
-    discount_pct = int(pricing["discount_rate"] * 100)
-    hist_line = ""
-    if history:
-        # just mention we checked history; don’t dump too much
-        hist_line = f"Reference: found {len(history)} similar historical quote(s) for context."
-
-    restock_line = ""
-    if restock_info.get("restocked"):
-        restock_line = (
-            f"(Inventory note: auto-restocked {restock_info['ordered_units']} units to maintain minimum levels; "
-            f"cost ${restock_info['cost']:.2f}.)"
-        )
-
-    return (
-    f"Quote for {qty} × {item}\n"
-    f"- Unit price: ${pricing['unit_price']:.2f}\n"
-    f"- Subtotal: ${pricing['subtotal']:.2f}\n"
-    f"- Bulk discount: {discount_pct}%\n"
-    f"- Total: ${pricing['total']:.2f}\n\n"
-    f"{fulfillment_line}\n"
-    f"{hist_line}\n"
-    f"{restock_line}\n\n"
-    f"--- Inventory Agent ---\n{inv_msg}\n\n"
-    f"--- Quote Agent ---\n{quote_msg}\n\n"
-    f"--- Fulfillment Agent ---\n{fulfill_msg}"
-    )
 
 # Run your test scenarios by writing them here. Make sure to keep track of them.
 
-def run_test_scenarios():
+def run_test_scenarios(limit: int | None = None, verbose: bool = True):
+    """
+    Runs the orchestrator on quote_requests_sample.csv.
+    - limit: set to 1 to test a single request
+    - verbose: print minimal progress + the customer-facing response only
+    """
     try:
         quote_requests_sample = pd.read_csv("quote_requests_sample.csv")
         quote_requests_sample["request_date"] = pd.to_datetime(
@@ -1062,77 +1053,41 @@ def run_test_scenarios():
         quote_requests_sample = quote_requests_sample.sort_values("request_date")
     except Exception as e:
         print(f"FATAL: Error loading test data: {e}")
-        return
+        return []
 
-    # Get initial state
-    initial_date = quote_requests_sample["request_date"].min().strftime("%Y-%m-%d")
-    report = generate_financial_report(initial_date)
-    current_cash = report["cash_balance"]
-    current_inventory = report["inventory_value"]
-
-    ############
-    ############
-    ############
-    # INITIALIZE YOUR MULTI AGENT SYSTEM HERE
-    ############
-    ############
-    ############
+    if limit is not None:
+        quote_requests_sample = quote_requests_sample.head(limit)
 
     results = []
     for idx, row in quote_requests_sample.iterrows():
         request_date = row["request_date"].strftime("%Y-%m-%d")
-
-        print(f"\n=== Request {idx+1} ===")
-        print(f"Context: {row['job']} organizing {row['event']}")
-        print(f"Request Date: {request_date}")
-        print(f"Cash Balance: ${current_cash:.2f}")
-        print(f"Inventory Value: ${current_inventory:.2f}")
-
-        # Process request
         request_with_date = f"{row['request']} (Date of request: {request_date})"
 
-        ############
-        ############
-        ############
-        # USE YOUR MULTI AGENT SYSTEM TO HANDLE THE REQUEST
-        ############
-        ############
-        ############
+        if verbose:
+            print(f"\n=== Request {len(results) + 1} ===")
+            print(f"Request Date: {request_date}")
 
-        response = call_your_multi_agent_system(request_with_date)
+        # Customer-facing response only
+        response = orchestrator.run(request_with_date)
 
-        # Update state
-        report = generate_financial_report(request_date)
-        current_cash = report["cash_balance"]
-        current_inventory = report["inventory_value"]
+        if verbose:
+            print(f"Response: {response}")
 
-        print(f"Response: {response}")
-        print(f"Updated Cash: ${current_cash:.2f}")
-        print(f"Updated Inventory: ${current_inventory:.2f}")
-
+        # Store only non-sensitive outputs (per rubric)
         results.append(
             {
                 "request_id": idx + 1,
                 "request_date": request_date,
-                "cash_balance": current_cash,
-                "inventory_value": current_inventory,
                 "response": response,
             }
         )
 
-        time.sleep(1)
-
-    # Final report
-    final_date = quote_requests_sample["request_date"].max().strftime("%Y-%m-%d")
-    final_report = generate_financial_report(final_date)
-    print("\n===== FINAL FINANCIAL REPORT =====")
-    print(f"Final Cash: ${final_report['cash_balance']:.2f}")
-    print(f"Final Inventory: ${final_report['inventory_value']:.2f}")
-
-    # Save results
-    pd.DataFrame(results).to_csv("test_results.csv", index=False)
+    out_path = os.path.abspath("test_results.csv")
+    pd.DataFrame(results).to_csv(out_path, index=False)
+    print("Saved:", out_path)
     return results
 
-
 if __name__ == "__main__":
-    results = run_test_scenarios()
+    results = run_test_scenarios(limit=1, verbose=True)  # set limit=None for full run
+
+
