@@ -1,0 +1,43 @@
+flowchart TD
+  Customer[Customer Request<br/>(includes Date)] --> ORCH[Orchestrator Agent]
+
+  %% Orchestrator delegates via wrapper tools (multi-agent orchestration)
+  ORCH --> AINV[ask_inventory_agent<br/>(delegates to InventoryAgent)]
+  ORCH --> AQUO[ask_quote_agent<br/>(delegates to QuoteAgent)]
+  ORCH --> AFUL[ask_fulfillment_agent<br/>(delegates to FulfillmentAgent)]
+
+  %% Orchestrator also uses tools directly (validation/reporting)
+  ORCH --> T_CAT[get_item_catalog_tool<br/>(SQL SELECT inventory)]
+  ORCH --> T_FIN[generate_financial_report_tool<br/>(generate_financial_report)]
+
+  %% InventoryAgent toolset
+  AINV --> INV[InventoryAgent]
+  INV --> T_INVALL[check_inventory_tool<br/>(get_all_inventory)]
+  INV --> T_CAT
+  INV --> T_STOCK[get_stock_level_tool<br/>(get_stock_level)]
+  INV --> T_RESTOCK[create_stock_order_tool<br/>(create_transaction: stock_orders)]
+  INV --> T_SAFEINV[safe_inventory_status_tool<br/>(wraps: get_stock_level + min_stock_level lookup)]
+
+  %% QuoteAgent toolset
+  AQUO --> QUO[QuoteAgent]
+  QUO --> T_QHIST[search_quote_history_tool<br/>(search_quote_history)]
+  QUO --> T_CAT
+
+  %% FulfillmentAgent toolset
+  AFUL --> FUL[FulfillmentAgent]
+  FUL --> T_SAFEINV
+  FUL --> T_SHIP[supplier_delivery_date_tool<br/>(get_supplier_delivery_date)]
+  FUL --> T_SALE[create_sale_tool<br/>(create_transaction: sales)]
+  FUL --> T_CASH[get_cash_balance_tool<br/>(get_cash_balance)]
+
+  %% Database
+  T_INVALL --> DB[(SQLite: munder_difflin.db)]
+  T_CAT --> DB
+  T_STOCK --> DB
+  T_RESTOCK --> DB
+  T_QHIST --> DB
+  T_SHIP --> DB
+  T_SALE --> DB
+  T_CASH --> DB
+  T_FIN --> DB
+  T_SAFEINV --> DB
