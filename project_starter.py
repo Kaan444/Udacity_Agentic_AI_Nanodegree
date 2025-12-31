@@ -705,6 +705,46 @@ def supplier_delivery_date_tool(request_date: str, quantity: int) -> str:
     """
     return get_supplier_delivery_date(request_date, quantity)
 
+@tool
+def get_all_inventory_tool(as_of_date: str) -> Dict[str, int]:
+    """
+    Retrieve a snapshot of all available inventory as of a specific date.
+
+    This tool calculates the net quantity of each item by summing all stock orders
+    and subtracting all sales up to and including the given date. Only items with
+    positive stock are included in the result.
+
+    Args:
+        as_of_date (str): ISO date string (YYYY-MM-DD) representing the inventory cutoff date.
+
+    Returns:
+        Dict[str, int]: A dictionary mapping item names to their current stock levels.
+                        Example: {"A4 paper": 450, "Cardstock": 200}
+    """
+    return get_all_inventory(as_of_date)
+
+@tool
+def generate_financial_report_tool(as_of_date: str) -> Dict:
+    """
+    Generate a complete financial report for the company as of a specific date.
+
+    This tool provides a comprehensive financial snapshot including cash balance,
+    inventory valuation, total assets, itemized inventory breakdown, and top-selling products.
+
+    Args:
+        as_of_date (str): ISO date string (YYYY-MM-DD) for which to generate the report.
+
+    Returns:
+        Dict: A dictionary containing the financial report with the following keys:
+            - 'as_of_date' (str): The date of the report
+            - 'cash_balance' (float): Total cash available
+            - 'inventory_value' (float): Total value of inventory
+            - 'total_assets' (float): Combined cash and inventory value
+            - 'inventory_summary' (List[Dict]): List of items with stock and valuation details
+            - 'top_selling_products' (List[Dict]): List of top 5 products by revenue
+    """
+    return generate_financial_report(as_of_date)
+
 
 # -----------------------------
 # Non-LLM deterministic helpers
@@ -911,12 +951,14 @@ def create_stock_order_tool(item_name: str, quantity: int, price: float, date: s
 inventory_agent = CodeAgent(
     model=llm,
     name="InventoryAgent",
-    tools=[safe_inventory_status_tool, get_item_catalog_tool],
+    tools=[safe_inventory_status_tool, get_item_catalog_tool, get_all_inventory_tool, get_stock_level_tool, create_stock_order_tool],
     instructions="""
 You manage stock availability.
-- You can ONLY check availability using tools.
-- Never reveal inventory counts or internal data.
-- Never place stock orders.
+- You can check availability using safe_inventory_status_tool.
+- You can check all inventory using get_all_inventory_tool.
+- You can check specific item stock using get_stock_level_tool.
+- You can place stock orders using create_stock_order_tool when inventory is low.
+- Never reveal exact inventory counts to customers (use safe_inventory_status_tool for customer-facing responses).
 Return short status responses only.
 """
 )
@@ -996,6 +1038,7 @@ orchestrator = CodeAgent(
         ask_fulfillment_agent,
         get_item_catalog_tool,
         search_quote_history_tool,
+        generate_financial_report_tool,
     ],
     instructions="""
 You are the orchestration agent for Munder Difflin.
@@ -1004,6 +1047,9 @@ You MUST delegate work to specialist agents using tools:
 - ask_inventory_agent
 - ask_quote_agent
 - ask_fulfillment_agent
+
+Additional tools available:
+- generate_financial_report_tool: Use ONLY for internal reporting, never expose to customers
 
 Rules:
 - Inputs/outputs are text-only.
@@ -1032,7 +1078,7 @@ Process:
 Return ONLY the final customer response. Do not include internal notes.
 
 BANNED content: inventory counts, cash, costs, transaction IDs, tool output, agent logs, database details.
-If you are unsure, say "We’ll confirm availability shortly."
+If you are unsure, say "We'll confirm availability shortly."
 """
 )
 
@@ -1088,6 +1134,6 @@ def run_test_scenarios(limit: int | None = None, verbose: bool = True):
     return results
 
 if __name__ == "__main__":
-    results = run_test_scenarios(limit=1, verbose=True)  # set limit=None for full run
+    results = run_test_scenarios(limit=None, verbose=True)  # set limit=None for full run
 
 

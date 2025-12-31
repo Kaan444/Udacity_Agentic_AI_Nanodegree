@@ -1,27 +1,43 @@
 flowchart TD
-  Customer[Customer Request\n(includes Date)] --> ORCH[Orchestrator Agent]
+  Customer[Customer Request<br/>(includes Date)] --> ORCH[Orchestrator Agent]
 
-  ORCH --> INV[InventoryAgent]
-  ORCH --> QUO[QuoteAgent]
-  ORCH --> FUL[FulfillmentAgent]
+  %% Orchestrator delegates via wrapper tools (multi-agent orchestration)
+  ORCH --> AINV[ask_inventory_agent<br/>(delegates to InventoryAgent)]
+  ORCH --> AQUO[ask_quote_agent<br/>(delegates to QuoteAgent)]
+  ORCH --> AFUL[ask_fulfillment_agent<br/>(delegates to FulfillmentAgent)]
 
-  INV --> T1[check_inventory_tool\n(get_all_inventory)]
-  INV --> T2[get_item_catalog_tool\n(SQL SELECT inventory)]
-  INV --> T3[get_stock_level_tool\n(get_stock_level)]
-  INV --> T4[create_stock_order_tool\n(create_transaction: stock_orders)]
+  %% Orchestrator also uses tools directly (validation/reporting)
+  ORCH --> T_CAT[get_item_catalog_tool<br/>(SQL SELECT inventory)]
+  ORCH --> T_FIN[generate_financial_report_tool<br/>(generate_financial_report)]
 
-  QUO --> T5[search_quote_history_tool\n(search_quote_history)]
-  QUO --> T2
+  %% InventoryAgent toolset
+  AINV --> INV[InventoryAgent]
+  INV --> T_INVALL[check_inventory_tool<br/>(get_all_inventory)]
+  INV --> T_CAT
+  INV --> T_STOCK[get_stock_level_tool<br/>(get_stock_level)]
+  INV --> T_RESTOCK[create_stock_order_tool<br/>(create_transaction: stock_orders)]
+  INV --> T_SAFEINV[safe_inventory_status_tool<br/>(wraps: get_stock_level + min_stock_level lookup)]
 
-  FUL --> T3
-  FUL --> T6[create_sale_tool\n(create_transaction: sales)]
-  FUL --> T7[supplier_delivery_date_tool\n(get_supplier_delivery_date)]
+  %% QuoteAgent toolset
+  AQUO --> QUO[QuoteAgent]
+  QUO --> T_QHIST[search_quote_history_tool<br/>(search_quote_history)]
+  QUO --> T_CAT
 
-  ORCH --> T8[generate_financial_report_tool\n(generate_financial_report)]
-  T1 --> DB[(SQLite: munder_difflin.db)]
-  T2 --> DB
-  T3 --> DB
-  T4 --> DB
-  T5 --> DB
-  T6 --> DB
-  T8 --> DB
+  %% FulfillmentAgent toolset
+  AFUL --> FUL[FulfillmentAgent]
+  FUL --> T_SAFEINV
+  FUL --> T_SHIP[supplier_delivery_date_tool<br/>(get_supplier_delivery_date)]
+  FUL --> T_SALE[create_sale_tool<br/>(create_transaction: sales)]
+  FUL --> T_CASH[get_cash_balance_tool<br/>(get_cash_balance)]
+
+  %% Database
+  T_INVALL --> DB[(SQLite: munder_difflin.db)]
+  T_CAT --> DB
+  T_STOCK --> DB
+  T_RESTOCK --> DB
+  T_QHIST --> DB
+  T_SHIP --> DB
+  T_SALE --> DB
+  T_CASH --> DB
+  T_FIN --> DB
+  T_SAFEINV --> DB
