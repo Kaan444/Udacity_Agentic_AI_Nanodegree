@@ -1,214 +1,180 @@
-request_id,request_date,response
-1,2025-04-01,"
-Thank you for your request! Here is the summary of your order:
+request_id,request_date,transaction_id,cash_balance_before,cash_balance_after,cash_balance_change,inventory_value_before,inventory_value_after,inventory_value_change,response
+1,2025-04-01,22.0,45059.7,45009.7,-50.0,4940.3,4980.3,40.0,"Thank you for your inquiry!
+Here is your quote:
+-----------------------------------
+Item: 100 sheets of Cardstock
+Unit Price: $0.15 each
+Total Price: $15.00
+-----------------------------------
+Please note that 200 sheets of Glossy paper and 100 sheets of Colored paper are currently unavailable, and stock orders have been created for them.
+Shipping is feasible, and your order for 100 sheets of Cardstock has been fulfilled.
+Thank you for your understanding!"
+2,2025-04-03,24.0,45009.7,45009.7,0.0,4980.3,4980.3,0.0,"Thank you for your inquiry!
 
-- **Item:** Heavy Cardstock (White)
-- **Quantity:** 100 sheets
-- **Unit Price:** $0.15
-- **Total Price:** $15.00
+Here is your quote for 300 rolls of crepe paper:
+- **Total Price:** $15.00 (This price includes bulk discounts that have been applied for your order of 300 rolls.)
 
-Please note that the following items are currently unavailable:
-- A4 glossy paper
-- Colored paper (assorted colors)
+Unfortunately, the order for 500 units of colored paper and 200 balloons is unavailable.
 
-The order for 100 units of heavy cardstock (white) has been successfully recorded and will be shipped shortly. If you have any further questions or need assistance, feel free to ask!
-"
-2,2025-04-03,"Thank you for your order! Here is the summary:
---------------------------------
-1. Colored paper (500 units): $50.00
-2. Crepe paper (300 units): $15.00
+Shipping feasibility has been confirmed for the crepe paper, and your order has been recorded.
+
+If you have any further questions or need assistance, feel free to ask!"
+3,2025-04-04,27.0,45009.7,43009.7,-2000.0,4980.3,5480.3,500.0,"Quote Summary:
+- 10,000 sheets of A4 paper: Unavailable (stock order placed)
+- 5,000 sheets of A3 paper: Available at $0.05 per sheet, total cost: $250.00
+- 500 reams of printer paper: Unavailable (stock order placed)
+Delivery Status: The order for 5,000 sheets of A3 paper has been successfully processed and will be delivered by April 15, 2025.
+Explanation: Bulk discounts may apply for large quantities."
+4,2025-04-05,28.0,43009.7,43059.7,50.0,5480.3,5467.8,-12.5,"Thank you for your inquiry!
+Here is your quote for 250 sheets of A4 paper:
+- A4 Paper (250 sheets at $0.05 each): $12.50
+Total: $12.50
+Please note that 500 sheets of Cardstock are currently unavailable.
+The sale transaction for the A4 paper has been recorded successfully."
+5,2025-04-05,,43059.7,42959.7,-100.0,5467.8,5467.8,0.0,"Thank you for your order! For the 300 sheets of cardstock, the price is $0.15 per sheet, totaling $45.00. For the 200 rolls of decorative washi tape, the price is $0.15 per roll due to bulk pricing, which totals $30.00. Therefore, your total cost is $75.00. Please note that the cardstock is currently unavailable and will not be delivered until April 19, 2025, while the decorative washi tape is available. We apologize for the inconvenience."
+6,2025-04-06,36.0,42959.7,42509.7,-450.0,5467.8,5467.8,0.0,"Quote for Paper Order:
+-----------------------------------
+1. Colored Paper (500 sheets): $50.00
+2. White Printer Paper (300 sheets): $15.00
+3. Cardstock (200 sheets): $30.00
+-----------------------------------
 Total Price: $105.00
-Note: Bulk discounts have been applied where applicable.
-
-Unfortunately, the crepe paper is unavailable and is estimated to be delivered by April 19, 2025, which is after your requested delivery date of April 15, 2025. We can proceed with the order for the colored paper only, or you may choose to wait for the crepe paper."
-3,2025-04-04,"Quote Summary:
 -----------------------------------
-Item: A4 Paper
-Quantity: 10,000 sheets
-Unit Price: $0.05
-Total Cost: $500.00
+The order of 500 sheets of colored paper, 300 sheets of white printer paper, and 200 sheets of cardstock can be fulfilled and will be delivered by April 15, 2025."
+7,2025-04-07,39.0,42509.7,42509.7,0.0,5467.8,5467.8,0.0,"Thank you for your order request. Here is the quote summary:
+- 200 sheets of Glossy paper at $0.20 each: $40.00
+- 1000 sheets of A4 paper at $0.05 each: $50.00
+- 200 sheets of Cardstock at $0.15 each: $30.00
+- 300 sheets of Banner paper at $0.30 each: $90.00
+Total: $210.00
 
-Item: A3 Paper
-Quantity: 5,000 sheets
-Unit Price: $0.05
-Total Cost: $250.00
+Shipping feasibility has been confirmed for all items. Please note that the 300 sheets of Large poster paper (24x36 inches) are unavailable, and we have suggested Banner paper as an alternative."
+8,2025-04-07,,42509.7,41309.7,-1200.0,5467.8,5567.8,100.0,"Thank you for your order! Here is your updated quote:
 
------------------------------------
-Total Combined Cost: $750.00
-Note: Bulk discounts have been applied for large quantities.
+Order Summary:
+1. Glossy paper: 500 units at $0.20 each
+2. A5 size paper: 4000 units at $0.05 each (combined total for both A5 orders)
+3. Colored cardstock: 788 units at $0.15 each
 
-Delivery Status:
-A4 paper is available for immediate fulfillment.
-A3 paper is unavailable for the requested delivery date.
-Estimated delivery date for A3 paper is October 8, 2023."
-4,2025-04-05,"Thank you for your order request. Unfortunately, the high-quality recycled cardstock is currently unavailable. However, we can fulfill your order for 250 sheets of A4 paper.
+Total Cost: $418.20
 
-Quote for 250 sheets of A4 paper:
-Total Price: $12.50
-Pricing Logic: The unit price for A4 paper is $0.05 per sheet. For this order of 250 sheets, the total cost is calculated as $0.05 multiplied by 250 sheets. Bulk discounts may apply.
-Shipping feasibility confirmed for 250 sheets of A4 paper.
+Note: Bulk discounts may apply based on the quantities ordered.
 
-If you have any further questions or need assistance with your order, please let us know."
-5,2025-04-05,"Quote Summary:
+Shipping feasibility cannot be confirmed at this moment due to pending inventory for A5 size paper and Colored cardstock. We will notify you once the items are available for shipping."
+9,2025-04-07,43.0,41309.7,41309.7,0.0,5567.8,5557.8,-10.0,"Quote Summary:
 ---------------------------------
-Colored paper (500 sheets at $0.10 each): $50.00
-Cardstock (300 sheets at $0.15 each): $45.00
+200 sheets of A4 paper at $0.05 each: $10.00
+100 sheets of glossy paper at $0.20 each: $20.00
 ---------------------------------
-Total Cost: $95.00
-
-Delivery Statement:
-Shipping is feasible, and your order for 500 sheets of Colored paper and 300 sheets of Cardstock will be delivered by April 15, 2025.
-
-Note:
-Unfortunately, the Decorative washi tape is unavailable for the requested quantity of 200 rolls."
-6,2025-04-06,"Thank you for your order request. Unfortunately, we are unable to fulfill your order for the following items:
-- Colorful construction paper: unavailable
-- White printer paper: unavailable
-
-However, we can provide a quote for 200 sheets of cardstock:
-- Total Price: $30.00
-- Explanation: The total price for 200 sheets of cardstock is calculated based on the unit price of $0.15 per sheet, with bulk discounts applied.
-
-Please note that there is insufficient stock for the cardstock, and the estimated supplier delivery date is January 4, 2026. We will not be able to meet your requested delivery date of April 15, 2025."
-7,2025-04-07,"Quote Summary:
--------------------
-Glossy A4 paper (500 units): $25.0
-Matte A3 paper (1000 units): $50.0
-Heavyweight cardstock (200 units): $30.0
--------------------
-Total Price: $105.0
-Note: Poster boards (24"" x 36"") are unavailable.
-The order for glossy A4 paper, matte A3 paper, and heavyweight cardstock has been successfully recorded and will be delivered by April 15, 2025."
-8,2025-04-07,"
-Thank you for your order! Here are the details:
-
-- **Items Ordered:**
-  - Glossy paper (500 units): $100.00
-  - A4 paper (1000 units): $50.00
-  - Colored paper (2000 units): $200.00
-
-- **Grand Total:** $350.00
-
-All items have been successfully sold and will be delivered by April 15, 2025.
-
-If you have any further questions or need assistance, feel free to ask!
-"
-9,2025-04-07,"Thank you for your order! Here is the quote summary:
-200 x A4 paper at $0.05 each: $10.00
-100 x Glossy paper at $0.20 each: $20.00
-50 x Kraft paper at $0.10 each: $5.00
-Total Price: $35.00
-
-The order can be fulfilled for delivery by April 10, 2025.
-We appreciate your business and look forward to serving you!"
-13,2025-04-08,"Quote for your order:
+Total cost: $30.00
 ---------------------------------
-1. A4 Paper (500 sheets) - $25.00
-2. Cardstock (200 sheets) - $30.00
+Note: 50 packets of 100% recycled kraft paper envelopes are unavailable.
+The order for A4 paper can be fulfilled, but there is a shortfall for the glossy paper, which will not be available by the requested delivery date."
+13,2025-04-08,45.0,41309.7,41354.7,45.0,5557.8,5532.8,-25.0,"Thank you for your order! Here is the summary:
+- 500 sheets of A4 paper at $0.05 each
+- 200 sheets of cardstock at $0.15 each
+- Total price: $55.00
+Shipping feasibility confirmed. Your order will be delivered by April 10, 2025."
+12,2025-04-08,,41354.7,41354.7,0.0,5532.8,5532.8,0.0,"Quote for your order:
 ---------------------------------
-Total Cost: $55.00
-Note: Bulk discounts may apply for larger quantities.
-Delivery Status: A4 paper order fulfilled. However, the cardstock is currently unavailable and is estimated to be delivered by October 5, 2023."
-12,2025-04-08,"
+1. Cardstock (100 sheets) at $0.15 each: $15.00
+2. A4 paper (500 sheets) at $0.05 each: $25.00
+3. Paper napkins (100 sheets) at $0.10 each: $10.00
+---------------------------------
+Total: $50.00
+---------------------------------
+Note: Bulk discounts have been applied to your order.
+The order will be delivered on April 16, 2025, due to the unavailability of paper napkins."
+10,2025-04-08,48.0,41354.7,41154.7,-200.0,5532.8,5562.8,30.0,"Quote Summary:
+---------------------------------
+Item: Glossy paper
+Quantity: 500 sheets
+Unit Price: $0.2
+Total Cost (after bulk discount): $90.00
+
+Item: Cardstock
+Quantity: 300 sheets
+Unit Price: $0.15
+Total Cost (after bulk discount): $45.00
+
+---------------------------------
+Final Total Cost: $135.00
+---------------------------------
+Delivery Status: The order has been successfully recorded and will be delivered by April 15, 2025.
+Thank you for your order!"
+11,2025-04-08,50.0,41154.7,41154.7,0.0,5562.8,5447.8,-115.0,"
 Thank you for your order! Here is the summary:
 
-- **Item**: Cardstock
-- **Quantity**: 200 sheets
-- **Unit Price**: $0.15 per sheet
-- **Total Price**: $30.00
+- Glossy Paper: 500 sheets at $0.20 each, totaling $100.00.
+- A4 Paper: 300 sheets at $0.05 each, totaling $15.00.
 
-Shipping feasibility has been confirmed, and your order for 200 sheets of Cardstock has been processed. Unfortunately, the requested quantities of standard printer paper and paper napkins are currently unavailable. 
+Total Cost: $115.00 (Bulk discounts have been applied where applicable).
 
-If you have any further questions or need assistance, feel free to ask!
+Your order for 500 sheets of Glossy paper and 300 sheets of A4 paper has been successfully fulfilled. Thank you for choosing us for your exhibition supplies!
 "
-10,2025-04-08,"Your order for 500 sheets of Glossy paper and 300 sheets of Cardstock has been successfully fulfilled. The total cost is $145.00. The items will be delivered by April 15, 2025. Thank you for your order!"
-11,2025-04-08,"Quote Summary:
-- 500 sheets of A3 glossy paper at $0.20 each: $100.00
-- 300 sheets of A4 matte paper at $0.05 each: $15.00
-Total Price: $115.00
-
-Delivery Statement: Shipping is feasible for your order of 500 sheets of A3 glossy paper and 300 sheets of A4 matte paper.
-Thank you for your order! We look forward to serving you at your exhibition."
-14,2025-04-09,"Quote for your order:
-- A4 paper (5000 units): $250.00
-- Colored paper (2000 units): $200.00
-Total price: $450.00
-Note: Bulk discounts may apply based on the quantities ordered.
-Delivery Status:
-- A4 paper: Fulfilled
-- Colored paper: Shortfall of 1000 sheets; 1000 sheets available with an estimated delivery date of October 5, 2023."
-15,2025-04-12,"Thank you for your order request. Unfortunately, we cannot fulfill the following items:
-- A4 paper: Not enough stock to fulfill the order of 5,500 units.
-- Colored paper: Insufficient inventory.
-- Cardboard: Not available in the catalog.
-
-We will confirm availability shortly."
-16,2025-04-13,"Quote Summary:
+14,2025-04-09,,41154.7,41154.7,0.0,5447.8,5447.8,0.0,"Thank you for your inquiry! Here is your quote:
+-------------------------------------
+Items:
+A4 paper (5000 units): $250.00
+-------------------------------------
+Total Price (after 10% bulk discount): $405.00
+Unfortunately, the colored paper is unavailable for delivery by April 15, 2025.
+We appreciate your business!"
+15,2025-04-12,55.0,41154.7,40172.7,-982.0,5447.8,5447.75,-0.05,"Thank you for your order! Here is the summary:
+- A4 Paper (10,000 sheets): $500.00 (1,978 additional needed)
+- Colored Paper (4,500 sheets): $450.00 (only 500 sheets available)
+- Cardboard (500 reams): $250.00
 ---------------------------------
-Item: A4 Paper
+Total Price: $1200.00
+Shipping Status: Order fulfilled successfully.
+Please note that no bulk discounts were applied as the quantities are below the thresholds for discounts."
+16,2025-04-13,58.0,40172.7,40072.7,-100.0,5447.75,5467.75,20.0,"Thank you for your order! Here are the details:
+- A4 Paper: 500 sheets at $0.05 each, Total: $25.00
+- Cardstock: 100 sheets at $0.15 each, Total: $15.00
+Total Price: $40.00
+Please note that the order for Colored paper is currently unavailable, but new stock has been ordered.
+The order for A4 paper and Cardstock can be fulfilled by April 15, 2025."
+17,2025-04-14,,40072.7,39972.7,-100.0,5467.75,5467.75,0.0,"Quote Summary:
+- A4 Paper (1000 sheets): $50.00
+- Colored Paper (500 sheets): Currently unavailable (estimated delivery date: April 19, 2025)
+- Table Napkins (2000): Partially available (estimated delivery date: April 22, 2025)
+- Paper Plates (500): $50.00 (partially available, estimated delivery date: April 19, 2025)
+Total Price for Available Items: $250.00
+Please note that the colored paper is currently unavailable, and the table napkins are partially available."
+18,2025-04-14,,39972.7,39972.7,0.0,5467.75,5467.75,0.0,"Quote Summary:
+Item: Cardstock
 Quantity: 500 sheets
-Unit Price: $0.05 per sheet
----------------------------------
+Unit Price: $0.15
+Total: $75.00
+
 Item: Colored Paper
 Quantity: 200 sheets
-Unit Price: $0.10 per sheet
----------------------------------
-Total Price: $45.00
+Unit Price: $0.10
+Total: $20.00
+
+Overall Total Cost: $95.00
+Note: Bulk discounts may apply.
 
 Delivery Statement:
-Shipping feasibility confirmed for the order of 500 sheets of A4 paper and 200 sheets of Colored paper.
+Unfortunately, the order cannot be fulfilled by April 15, 2025, due to a shortfall in Cardstock. The estimated delivery date for the shortfall is April 19, 2025.
 
-Explanation:
-The total price of $45.00 is calculated based on the quantities and unit prices of the items ordered. No additional bulk discounts were applied as the total price reflects the standard pricing for the quantities ordered."
-17,2025-04-14,"Quote for Requested Items:
------------------------------------
-1000 x A4 paper at $0.05 each: $50.00
-500 x Colored paper at $0.10 each: $50.00
-2000 x table napkins at $0.10 each: $200.00
-1000 x paper cups at $0.10 each: $100.00
-500 x Paper plates at $0.10 each: $50.00
+Please note that the standard printing paper is currently unavailable."
+19,2025-04-15,,40189.7,40189.7,0.0,5347.55,5347.55,0.0,"Thank you for your inquiry! Here is the quote for your requested items:
 
-Total Price: $450.00
+2000 x A4 glossy paper at $0.2 each: $400.00
+1500 x A3 matte paper at $0.05 each: $75.00
+1000 x Cardstock at $0.15 each: $150.00
 
-Availability Status:
-- A4 paper: available
-- Colored paper: partial (estimated delivery on 2025-04-19)
-- Table napkins: partial (estimated delivery on 2025-04-22)
-- Paper cups: partial (estimated delivery on 2025-04-19)
-- Paper plates: available
+Total Price: $625.00
 
-We will confirm the shipping details shortly."
-18,2025-04-14,"Thank you for your order request. Here is the summary:
-1. Cardstock: 200 sheets at $0.15 each, Total: $30.00
-2. Colored Paper: 200 sheets at $0.10 each, Total: $20.00
-Total Price: $50.00
-Unfortunately, we cannot fulfill your order as all requested items are currently unavailable.
-Estimated delivery date for all items would be January 4, 2026.
-We apologize for the inconvenience and recommend checking back later for availability."
-19,2025-04-15,"Thank you for your order request. Here is the quote summary:
-- A4 glossy paper: 2000 sheets at $0.05 each (10% discount applied) - Total: $90.00
-- A3 matte paper: 1500 sheets at $0.05 each (10% discount applied) - Total: $67.50
-- Cardstock assorted colors: 1000 sheets at $0.15 each - Total: $150.00
-Total Price: $307.50
+Unfortunately, the A4 glossy paper and A3 matte paper are currently unavailable. However, we can partially fulfill your order for cardstock, which will be delivered by April 24, 2025.
 
-Please note that the following items are on backorder and cannot be delivered by your requested date:
-- A4 glossy paper: Estimated delivery on April 27, 2025
-- A3 matte paper: Estimated delivery on April 27, 2025
-- Cardstock assorted colors: Estimated delivery on April 24, 2025
-
-We appreciate your understanding and patience as we fulfill your order."
-20,2025-04-17,"Quote for Printing Services:
------------------------------------
-Items:
-- Flyers (5000 units at $0.10 each)
-- Posters (2000 units at $1.00 each)
-- Tickets (10000 units at $0.50 each)
------------------------------------
-Total Cost: $6750.00
------------------------------------
-Pricing Logic:
-A bulk discount of 10% was applied since the total quantity exceeds 10,000 units.
------------------------------------
-Delivery Status:
-Not enough stock to fulfill the order immediately. However, the estimated delivery dates for the posters and tickets are October 8, 2023.
-"
+Please let us know how you would like to proceed!"
+20,2025-04-17,64.0,40189.7,41039.7,850.0,5347.55,5347.55,0.0,"Thank you for your order! Here is your quote:
+Total cost for 5000 flyers: $1000.0
+Total cost for 2000 posters: $2000.0
+Total cost before discount: $3000.0
+Bulk discount applied (10%): -$300.0
+Total cost after discount: $2700.0
+The order for 5000 flyers and 2000 posters can be fulfilled and has been recorded successfully.
+Please note that tickets are currently unavailable. We appreciate your business and look forward to serving you!"

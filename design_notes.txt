@@ -8,15 +8,16 @@ flowchart TD
 
   %% Orchestrator also uses tools directly (validation/reporting)
   ORCH --> T_CAT[get_item_catalog_tool<br/>(SQL SELECT inventory)]
+  ORCH --> T_QHIST[search_quote_history_tool<br/>(search_quote_history)]
   ORCH --> T_FIN[generate_financial_report_tool<br/>(generate_financial_report)]
 
   %% InventoryAgent toolset
   AINV --> INV[InventoryAgent]
-  INV --> T_INVALL[check_inventory_tool<br/>(get_all_inventory)]
+  INV --> T_SAFEINV[safe_inventory_status_tool<br/>(wraps: get_stock_level + min_stock_level lookup)]
   INV --> T_CAT
+  INV --> T_INVALL[get_all_inventory_tool<br/>(get_all_inventory)]
   INV --> T_STOCK[get_stock_level_tool<br/>(get_stock_level)]
   INV --> T_RESTOCK[create_stock_order_tool<br/>(create_transaction: stock_orders)]
-  INV --> T_SAFEINV[safe_inventory_status_tool<br/>(wraps: get_stock_level + min_stock_level lookup)]
 
   %% QuoteAgent toolset
   AQUO --> QUO[QuoteAgent]
@@ -26,9 +27,8 @@ flowchart TD
   %% FulfillmentAgent toolset
   AFUL --> FUL[FulfillmentAgent]
   FUL --> T_SAFEINV
-  FUL --> T_SHIP[supplier_delivery_date_tool<br/>(get_supplier_delivery_date)]
   FUL --> T_SALE[create_sale_tool<br/>(create_transaction: sales)]
-  FUL --> T_CASH[get_cash_balance_tool<br/>(get_cash_balance)]
+  FUL --> T_SHIP[supplier_delivery_date_tool<br/>(get_supplier_delivery_date)]
 
   %% Database
   T_INVALL --> DB[(SQLite: munder_difflin.db)]
@@ -38,6 +38,5 @@ flowchart TD
   T_QHIST --> DB
   T_SHIP --> DB
   T_SALE --> DB
-  T_CASH --> DB
   T_FIN --> DB
   T_SAFEINV --> DB

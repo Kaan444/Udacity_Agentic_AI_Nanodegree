@@ -620,6 +620,23 @@ llm = OpenAIModel(
 )
 
 # -----------------------------
+# Transaction tracking for test scenarios
+# -----------------------------
+_latest_sale_transaction_id = None
+
+def _track_sale_transaction(transaction_id: int):
+    """Internal helper to track the latest sale transaction ID."""
+    global _latest_sale_transaction_id
+    _latest_sale_transaction_id = transaction_id
+
+def _get_and_clear_sale_transaction_id() -> Union[int, None]:
+    """Get and clear the latest sale transaction ID."""
+    global _latest_sale_transaction_id
+    tid = _latest_sale_transaction_id
+    _latest_sale_transaction_id = None
+    return tid
+
+# -----------------------------
 # Extra DB helper tools
 # -----------------------------
 @tool
@@ -680,16 +697,18 @@ def create_sale_tool(item_name: str, quantity: int, price: float, date: str) -> 
         date (str): ISO date YYYY-MM-DD.
 
     Returns:
-        str: "ok" if recorded.
+        str: Transaction ID as a string if recorded successfully.
     """
-    _ = create_transaction(
+    transaction_id = create_transaction(
         item_name=item_name,
         transaction_type="sales",
         quantity=quantity,
         price=price,
         date=date,
     )
-    return "ok"
+    # Track this transaction for test scenario verification
+    _track_sale_transaction(transaction_id)
+    return str(transaction_id)
 
 @tool
 def supplier_delivery_date_tool(request_date: str, quantity: int) -> str:
@@ -1089,6 +1108,7 @@ def run_test_scenarios(limit: int | None = None, verbose: bool = True):
     Runs the orchestrator on quote_requests_sample.csv.
     - limit: set to 1 to test a single request
     - verbose: print minimal progress + the customer-facing response only
+    - Tracks cash balance and inventory value before and after each request
     """
     try:
         quote_requests_sample = pd.read_csv("quote_requests_sample.csv")
@@ -1113,24 +1133,96 @@ def run_test_scenarios(limit: int | None = None, verbose: bool = True):
             print(f"\n=== Request {len(results) + 1} ===")
             print(f"Request Date: {request_date}")
 
+        # Track cash balance and inventory value BEFORE processing the request
+        cash_before = get_cash_balance(request_date)
+        financial_report_before = generate_financial_report(request_date)
+        inventory_value_before = financial_report_before["inventory_value"]
+
+        if verbose:
+            print(f"Cash Balance Before: ${cash_before:,.2f}")
+            print(f"Inventory Value Before: ${inventory_value_before:,.2f}")
+
         # Customer-facing response only
         response = orchestrator.run(request_with_date)
 
+        # Check if a sale transaction was created during this request
+        transaction_id = _get_and_clear_sale_transaction_id()
+
+        # Track cash balance and inventory value AFTER processing the request
+        cash_after = get_cash_balance(request_date)
+        financial_report_after = generate_financial_report(request_date)
+        inventory_value_after = financial_report_after["inventory_value"]
+
+        # Calculate changes
+        cash_change = cash_after - cash_before
+        inventory_change = inventory_value_after - inventory_value_before
+
         if verbose:
+            print(f"Cash Balance After: ${cash_after:,.2f}")
+            print(f"Inventory Value After: ${inventory_value_after:,.2f}")
+            print(f"Cash Change: ${cash_change:,.2f}")
+            print(f"Inventory Change: ${inventory_change:,.2f}")
+            if transaction_id:
+                print(f"Transaction ID: {transaction_id} (Sale completed)")
+            else:
+                print("Transaction ID: None (No sale completed)")
             print(f"Response: {response}")
 
-        # Store only non-sensitive outputs (per rubric)
+        # Store outputs with financial tracking data
         results.append(
             {
                 "request_id": idx + 1,
                 "request_date": request_date,
+                "transaction_id": transaction_id if transaction_id else None,
+                "cash_balance_before": round(cash_before, 2),
+                "cash_balance_after": round(cash_after, 2),
+                "cash_balance_change": round(cash_change, 2),
+                "inventory_value_before": round(inventory_value_before, 2),
+                "inventory_value_after": round(inventory_value_after, 2),
+                "inventory_value_change": round(inventory_change, 2),
                 "response": response,
             }
         )
 
     out_path = os.path.abspath("test_results.csv")
     pd.DataFrame(results).to_csv(out_path, index=False)
-    print("Saved:", out_path)
+    print(f"\nSaved: {out_path}")
+
+    # Verify at least 3 requests show cash balance changes
+    cash_changes_count = sum(1 for r in results if r["cash_balance_change"] != 0)
+    print(f"\n--- Verification Summary ---")
+    print(f"Requests with cash balance changes: {cash_changes_count}")
+
+    if cash_changes_count < 3:
+        print("WARNING: Less than 3 requests show cash balance changes!")
+    else:
+        print(f"SUCCESS: {cash_changes_count} requests show cash balance changes (minimum 3 required)")
+
+    # Verify at least 3 requests show successful transactions
+    successful_transactions = [r for r in results if r["transaction_id"] is not None]
+    successful_count = len(successful_transactions)
+    print(f"\nRequests with successful sale transactions: {successful_count}")
+
+    if successful_count < 3:
+        print("WARNING: Less than 3 requests show successful fulfillment with database transactions!")
+    else:
+        print(f"SUCCESS: {successful_count} requests completed with database transactions (minimum 3 required)")
+        print("\nSuccessful transaction IDs:")
+        for r in successful_transactions:
+            print(f"  - Request {r['request_id']}: Transaction ID {r['transaction_id']}")
+
+    # Verify transaction IDs in database
+    if successful_count > 0:
+        print("\nVerifying transactions in database...")
+        for r in successful_transactions[:5]:  # Show first 5 for brevity
+            tid = r['transaction_id']
+            verify_query = f"SELECT * FROM transactions WHERE id = {tid} AND transaction_type = 'sales'"
+            verification = pd.read_sql(verify_query, db_engine)
+            if not verification.empty:
+                print(f"  ✓ Transaction {tid} confirmed in database (item: {verification.iloc[0]['item_name']}, units: {verification.iloc[0]['units']})")
+            else:
+                print(f"  ✗ Transaction {tid} NOT FOUND in database!")
+
     return results
 
 if __name__ == "__main__":

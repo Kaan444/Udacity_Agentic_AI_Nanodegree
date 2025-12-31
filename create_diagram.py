@@ -59,9 +59,9 @@ draw_arrow(ax, 8, 12.2, 8, 11.3)
 
 # Orchestrator's direct tools (top row)
 orch_tools_y = 9
-draw_box(ax, 10.5, orch_tools_y, 2.0, 0.5, 'get_item_catalog_tool\n(SQL SELECT inventory)', COLOR_TOOL, 7)
-draw_box(ax, 13, orch_tools_y, 2.0, 0.5, 'search_quote_history_tool\n(search_quote_history)', COLOR_TOOL, 7)
-draw_box(ax, 15.2, orch_tools_y, 2.0, 0.5, 'generate_financial_report_tool\n(internal reporting only)', COLOR_TOOL, 7)
+draw_box(ax, 10.5, orch_tools_y, 2.5, 0.7, 'get_item_catalog_tool\nPurpose: Fetch available items,\nprices, and catalog info\nUses: SQL SELECT inventory', COLOR_TOOL, 6)
+draw_box(ax, 13, orch_tools_y, 2.5, 0.7, 'search_quote_history_tool\nPurpose: Find similar past quotes\nfor pricing guidance\nUses: search_quote_history()', COLOR_TOOL, 6)
+draw_box(ax, 15.2, orch_tools_y, 2.5, 0.7, 'generate_financial_report_tool\nPurpose: Internal financial analysis\n(never shown to customers)\nUses: generate_financial_report()', COLOR_TOOL, 6)
 
 # Arrows from Orchestrator to its tools
 draw_arrow(ax, 9.2, 10.2, 9.6, 9.25)
@@ -70,14 +70,14 @@ draw_arrow(ax, 9.7, 10.0, 14.3, 9.25)
 
 # Agent wrapper tools (middle row)
 wrapper_y = 7.5
-draw_box(ax, 3, wrapper_y, 2.4, 0.6, 'ask_inventory_agent\n(delegates)', COLOR_TOOL, 8, 'bold')
-draw_box(ax, 8, wrapper_y, 2.4, 0.6, 'ask_quote_agent\n(delegates)', COLOR_TOOL, 8, 'bold')
-draw_box(ax, 13, wrapper_y, 2.4, 0.6, 'ask_fulfillment_agent\n(delegates)', COLOR_TOOL, 8, 'bold')
+draw_box(ax, 3, wrapper_y, 2.6, 0.8, 'ask_inventory_agent\nPurpose: Delegate inventory\nchecks and restocking tasks\nCalls: inventory_agent.run()', COLOR_TOOL, 6.5, 'bold')
+draw_box(ax, 8, wrapper_y, 2.6, 0.8, 'ask_quote_agent\nPurpose: Delegate quote\ngeneration and pricing logic\nCalls: quote_agent.run()', COLOR_TOOL, 6.5, 'bold')
+draw_box(ax, 13, wrapper_y, 2.6, 0.8, 'ask_fulfillment_agent\nPurpose: Delegate order\nfulfillment and delivery\nCalls: fulfillment_agent.run()', COLOR_TOOL, 6.5, 'bold')
 
 # Arrows from Orchestrator to wrapper tools
-draw_arrow(ax, 6.5, 10.3, 3.8, 8.1)
-draw_arrow(ax, 8, 10.1, 8, 8.1)
-draw_arrow(ax, 9.5, 10.3, 12.2, 8.1)
+draw_arrow(ax, 6.5, 10.3, 3.8, 8.3)
+draw_arrow(ax, 8, 10.1, 8, 8.3)
+draw_arrow(ax, 9.5, 10.3, 12.2, 8.3)
 
 # Actual Agents (lower row)
 agent_y = 5.8
@@ -86,46 +86,46 @@ draw_box(ax, 8, agent_y, 2.2, 0.7, 'QuoteAgent', COLOR_AGENT, 10, 'bold')
 draw_box(ax, 13, agent_y, 2.2, 0.7, 'FulfillmentAgent', COLOR_AGENT, 10, 'bold')
 
 # Arrows from wrapper tools to agents
-draw_arrow(ax, 3, 7.2, 3, 6.15)
-draw_arrow(ax, 8, 7.2, 8, 6.15)
-draw_arrow(ax, 13, 7.2, 13, 6.15)
+draw_arrow(ax, 3, 7.1, 3, 6.15)
+draw_arrow(ax, 8, 7.1, 8, 6.15)
+draw_arrow(ax, 13, 7.1, 13, 6.15)
 
 # InventoryAgent tools
 inv_tools_y = 4
 inv_tools = [
-    'safe_inventory_status_tool\n(availability check)',
-    'get_item_catalog_tool\n(SQL SELECT inventory)',
-    'get_all_inventory_tool\n(get_all_inventory)',
-    'get_stock_level_tool\n(get_stock_level)',
-    'create_stock_order_tool\n(create_transaction:\nstock_orders)'
+    'safe_inventory_status_tool\nPurpose: Check availability\nwithout revealing counts\nUses: get_stock_level()',
+    'get_item_catalog_tool\nPurpose: Fetch item\ndetails and pricing\nUses: SQL SELECT',
+    'get_all_inventory_tool\nPurpose: Get snapshot\nof all stock levels\nUses: get_all_inventory()',
+    'get_stock_level_tool\nPurpose: Check exact\nstock for item\nUses: get_stock_level()',
+    'create_stock_order_tool\nPurpose: Record inventory\npurchases\nUses: create_transaction()'
 ]
 for i, tool in enumerate(inv_tools):
     x_pos = 0.5 + i * 1.1
-    draw_box(ax, x_pos, inv_tools_y, 1.0, 0.7, tool, COLOR_TOOL, 6)
-    draw_arrow(ax, 3, 5.45, x_pos, 4.35)
+    draw_box(ax, x_pos, inv_tools_y, 1.0, 1.0, tool, COLOR_TOOL, 5.2)
+    draw_arrow(ax, 3, 5.45, x_pos, 4.5)
 
 # QuoteAgent tools
 quote_tools_y = 4
 quote_tools = [
-    'search_quote_history_tool\n(search_quote_history)',
-    'get_item_catalog_tool\n(SQL SELECT inventory)'
+    'search_quote_history_tool\nPurpose: Search past quotes\nto inform pricing decisions\nUses: search_quote_history()',
+    'get_item_catalog_tool\nPurpose: Access item prices\nfor quote calculations\nUses: SQL SELECT inventory'
 ]
 for i, tool in enumerate(quote_tools):
-    x_pos = 7 + i * 2
-    draw_box(ax, x_pos, quote_tools_y, 1.8, 0.5, tool, COLOR_TOOL, 6)
-    draw_arrow(ax, 8, 5.45, x_pos, 4.25)
+    x_pos = 7 + i * 2.2
+    draw_box(ax, x_pos, quote_tools_y, 2.0, 0.85, tool, COLOR_TOOL, 5.5)
+    draw_arrow(ax, 8, 5.45, x_pos, 4.425)
 
 # FulfillmentAgent tools
 ful_tools_y = 4
 ful_tools = [
-    'safe_inventory_status_tool\n(availability check)',
-    'create_sale_tool\n(create_transaction:\nsales)',
-    'supplier_delivery_date_tool\n(get_supplier_delivery_date)'
+    'safe_inventory_status_tool\nPurpose: Verify stock\navailability\nUses: get_stock_level()',
+    'create_sale_tool\nPurpose: Record sales\ntransactions\nUses: create_transaction()',
+    'supplier_delivery_date_tool\nPurpose: Estimate delivery\ntimes\nUses: get_supplier_delivery_date()'
 ]
 for i, tool in enumerate(ful_tools):
-    x_pos = 11.5 + i * 1.5
-    draw_box(ax, x_pos, ful_tools_y, 1.3, 0.7, tool, COLOR_TOOL, 6)
-    draw_arrow(ax, 13, 5.45, x_pos, 4.35)
+    x_pos = 11.5 + i * 1.6
+    draw_box(ax, x_pos, ful_tools_y, 1.5, 1.0, tool, COLOR_TOOL, 5.2)
+    draw_arrow(ax, 13, 5.45, x_pos, 4.5)
 
 # Database (bottom)
 db_y = 1.5
